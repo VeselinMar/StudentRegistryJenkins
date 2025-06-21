@@ -1,31 +1,30 @@
-FROM node:14
+FROM jenkins/jenkins:lts
 
-# Install Docker CLI & docker-compose (legacy)
 USER root
 
+# Install Docker CLI
 RUN apt-get update && \
-    apt-get install -y curl apt-transport-https ca-certificates gnupg lsb-release software-properties-common
+    apt-get install -y \
+      apt-transport-https \
+      ca-certificates \
+      curl \
+      gnupg \
+      lsb-release \
+      software-properties-common
 
-# Add Docker GPG and CLI
+# Add Docker GPG key and repo
 RUN curl -fsSL https://download.docker.com/linux/debian/gpg | apt-key add - && \
     echo "deb [arch=amd64] https://download.docker.com/linux/debian $(lsb_release -cs) stable" \
     > /etc/apt/sources.list.d/docker.list && \
-    apt-get update && apt-get install -y docker-ce-cli
+    apt-get update && \
+    apt-get install -y docker-ce-cli
 
-# Install docker-compose (LEGACY binary — this is what Jenkins needs!)
+# Install docker-compose (legacy version)
 RUN curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
     -o /usr/local/bin/docker-compose && \
-    chmod +x /usr/local/bin/docker-compose && \
-    ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+    chmod +x /usr/local/bin/docker-compose
 
-# Set the working directory
-WORKDIR /app
+# Let Jenkins user use Docker
+RUN usermod -aG docker jenkins
 
-COPY package*.json ./
-RUN npm install
-
-COPY . .
-
-EXPOSE 3030
-
-CMD [ "npm", "start" ]
+USER jenkins
