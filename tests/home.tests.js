@@ -11,6 +11,6 @@ suite('Home page', function() {
   test('Students count', async function() {
     let res = await fetch("http://localhost:8888/");
     let body = await res.text();
-    assert.ok(body.includes("Registered Students: <b>2</b>"));
+    assert.ok(body.includes("Registered students: <b>2</b>"));
   });
 });
